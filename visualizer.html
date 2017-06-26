@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Stack/Queue Visualizer</title>
+  </head>
+
+  <style>
+
+    body {
+      text-align: center;
+    }
+
+    .arc path {
+      stroke: #FFFFFF;
+    }
+
+    text {
+      font-family: Arial;
+    }
+
+  </style>
+
+  <body>
+    <br>
+    <strong style='font-family:Arial;font-size:36px;'></strong>
+    <br><br><br>
+    <script src="d3.min.js"></script>
+    <script src="data.js"></script>
+    <script>
+
+      var width = 640,
+        height = 480;
+
+      var svg = d3.select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      if (type === 'queue') {
+
+        d3.select("strong").text("Circular Queue Simulator");
+        d3.select("body")
+          .append("div")
+          .html("<br><p>Blue cells are filled. The number inside the cell indicates it's contents.</p><p>Grey cells with '#' inside are empty.</p><p>Inner indices indicate array index.</p><p>'H' indicates that cell is the head of the queue.</p><p>'T' indicates that cell is the tail of the queue.</p>")
+          .style("font-family", "Arial");
+
+        console.log(type, head, tail, data);
+
+        var pieData = [];
+        for (var i = 0; i < data.length; i++)
+          pieData.push({
+            value: 100/data.length,
+            data: -1,
+            head: (i === head),
+            tail: (i === tail)
+          });
+
+        for (var i = 0; i < size; i++)
+          pieData[(head + i) % data.length].data = data[(head + i) % data.length];
+
+        console.log(pieData);
+
+        var radius = Math.min(width, height) / 2;
+
+        var g = svg.append("g")
+          .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+        var pie = d3.pie()
+          .value( d => { return d.value; })
+          .sort(null);
+
+        var path = d3.arc()
+          .outerRadius(radius)
+          .innerRadius(radius/2);
+
+        var dataLabel = d3.arc()
+          .outerRadius(3*(radius)/4)
+          .innerRadius(3*(radius)/4);
+
+        var queueLabel = d3.arc()
+          .outerRadius((radius + 10)/2 - 25)
+          .innerRadius((radius + 10)/2 - 25);
+
+        var headLabel = d3.arc()
+          .outerRadius(radius - 25)
+          .innerRadius(radius - 25);
+
+        var tailLabel = d3.arc()
+          .outerRadius(radius / 1.7)
+          .innerRadius(radius / 1.7);
+
+        var arc = g.selectAll(".arc")
+          .data(pie(pieData))
+          .enter()
+          .append("g")
+          .attr("class", "arc");
+
+        arc.append("path")
+          .attr("d", path)
+          .attr("fill", (d) => { return (d.data.data >= 0) ? "#4ACDAB" : "#696969"; })
+          .attr("opacity", (d) => { return (d.data.data >= 0) ? 1 : 0.5; });
+
+        arc.append("text")
+         .attr("transform", (d) => { return "translate(" + dataLabel.centroid(d) + ")"; })
+         .attr("dy", "0.35em")
+         .text((d) => { return (d.data.data >= 0) ? d.data.data : "#"; })
+         .attr("opacity", (d) => { return (d.data.data >= 0) ? 1 : 0.5; });
+
+        arc.append("text")
+          .attr("transform", (d) => { return "translate(" + queueLabel.centroid(d) + ")"; })
+          .attr("dy", "0.35em")
+          .text((d) => { return d.index; });
+
+        arc.append("text")
+          .attr("transform", (d) => { return "translate(" + headLabel.centroid(d) + ")"; })
+          .attr("dy", "0.35em")
+          .text((d) => { return d.data.head ? "H" : ""; })
+          .attr("fill", "red");
+
+        arc.append("text")
+          .attr("transform", (d) => { return "translate(" + tailLabel.centroid(d) + ")"; })
+          .attr("dy", "0.35em")
+          .text((d) => { return d.data.tail ? "T" : ""; })
+          .attr("fill", "red");
+
+
+
+        } else if (type === 'stack') {
+
+          d3.select("strong").text("Dynamic Stack Simulator");
+          d3.select("body")
+            .append("div")
+            .html("<br><p>Stack!</p>")
+            .style("font-family", "Arial");
+
+
+
+
+        }
+
+    </script>
+    <br>
+    <hr>
+    <p style='font-family:Arial;'>MTE 140 Assignment 2 Stack/Queue Simulator - &copy; Sherman Qiu & Dayton Salmon - Tron 2021</p>
+  </body>
+</html>
